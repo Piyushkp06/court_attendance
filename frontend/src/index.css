@@ -2,34 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Official Odisha Court Attendance System Design 
+   Professional, formal design with enhanced dark mode support
 */
 
 @layer base {
   :root {
-    --background: 0 0% 97%;
-    --foreground: 215 72% 13%;
+    /* Light mode - Softer, professional with reduced contrast */
+    --background: 210 20% 98%;
+    --foreground: 220 26% 18%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 72% 13%;
+    --card-foreground: 220 26% 18%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 72% 13%;
+    --popover-foreground: 220 26% 18%;
 
-    --primary: 215 72% 13%;
+    /* Primary - Professional Blue */
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 15% 92%;
-    --secondary-foreground: 215 72% 13%;
+    --secondary: 210 20% 94%;
+    --secondary-foreground: 220 26% 18%;
 
-    --muted: 215 15% 95%;
-    --muted-foreground: 215 20% 45%;
+    --muted: 210 20% 94%;
+    --muted-foreground: 220 13% 46%;
 
-    --accent: 43 42% 58%;
-    --accent-foreground: 215 72% 13%;
+    /* Accent - Warm professional gold */
+    --accent: 43 74% 60%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
     --success: 142 71% 45%;
@@ -38,65 +41,75 @@ All colors MUST be HSL.
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 215 15% 88%;
-    --input: 215 15% 88%;
-    --ring: 215 72% 13%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
 
-    --radius: 0.75rem;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 217 91% 60%;
 
-    --sidebar-background: 215 72% 13%;
+    --radius: 0.5rem;
+
+    /* Sidebar colors */
+    --sidebar-background: 217 91% 60%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 43 42% 58%;
-    --sidebar-primary-foreground: 215 72% 13%;
-    --sidebar-accent: 215 60% 18%;
+    --sidebar-primary: 43 74% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 91% 55%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 215 50% 20%;
-    --sidebar-ring: 43 42% 58%;
+    --sidebar-border: 217 91% 55%;
+    --sidebar-ring: 43 74% 60%;
   }
 
   .dark {
-    --background: 215 72% 8%;
-    --foreground: 0 0% 98%;
+    /* Dark mode - Soothing and professional with reduced eye strain */
+    --background: 220 26% 14%;
+    --foreground: 210 20% 92%;
 
-    --card: 215 60% 12%;
-    --card-foreground: 0 0% 98%;
+    --card: 220 26% 18%;
+    --card-foreground: 210 20% 92%;
 
-    --popover: 215 60% 12%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 220 26% 18%;
+    --popover-foreground: 210 20% 92%;
 
-    --primary: 43 42% 58%;
-    --primary-foreground: 215 72% 13%;
+    /* Primary - Softer blue for dark mode (Less harsh) */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 50% 20%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 220 17% 24%;
+    --secondary-foreground: 210 20% 92%;
 
-    --muted: 215 50% 20%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 220 17% 24%;
+    --muted-foreground: 215 16% 65%;
 
-    --accent: 43 42% 58%;
-    --accent-foreground: 215 72% 13%;
+    /* Accent - Softer amber/gold (Warm but not harsh) */
+    --accent: 43 74% 60%;
+    --accent-foreground: 220 26% 14%;
 
-    --destructive: 0 62% 45%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 62% 58%;
+    --destructive-foreground: 0 0% 100%;
 
-    --success: 142 71% 45%;
+    --success: 142 71% 55%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 38 92% 60%;
+    --warning-foreground: 220 26% 14%;
 
-    --border: 215 50% 20%;
-    --input: 215 50% 20%;
-    --ring: 43 42% 58%;
+    --info: 199 89% 58%;
+    --info-foreground: 0 0% 100%;
 
-    --sidebar-background: 215 72% 13%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 43 42% 58%;
-    --sidebar-primary-foreground: 215 72% 13%;
-    --sidebar-accent: 215 60% 18%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 215 50% 20%;
-    --sidebar-ring: 43 42% 58%;
+    --border: 220 17% 28%;
+    --input: 220 17% 24%;
+    --ring: 217 91% 60%;
+
+    --sidebar-background: 220 26% 14%;
+    --sidebar-foreground: 210 20% 92%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 17% 24%;
+    --sidebar-accent-foreground: 210 20% 92%;
+    --sidebar-border: 220 17% 28%;
+    --sidebar-ring: 217 91% 60%;
   }
 }
 
@@ -107,35 +120,161 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight;
+    transition: color 0.3s ease;
+  }
+
+  h1 {
+    @apply text-3xl lg:text-4xl;
+  }
+
+  h2 {
+    @apply text-2xl lg:text-3xl;
+  }
+
+  h3 {
+    @apply text-xl lg:text-2xl;
+  }
+
+  /* Smooth transitions for theme changes */
+  * {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
   }
 }
 
 @layer utilities {
+  /* Professional card with subtle shadow and smooth hover */
   .glass-card {
-    @apply bg-card/80 backdrop-blur-sm border border-border shadow-lg;
+    @apply bg-card/95 backdrop-blur-md border border-border/50 shadow-lg hover:shadow-xl transition-all duration-300;
   }
 
+  /* Softer gradient for headers */
   .official-gradient {
-    @apply bg-gradient-to-br from-primary via-primary to-primary/90;
+    @apply bg-gradient-to-br from-primary/95 via-primary/90 to-primary/85;
   }
 
+  /* Gold accent for important highlights */
   .gold-accent {
-    @apply text-accent;
+    @apply text-accent font-semibold;
   }
 
+  /* Status badges with softer colors for better readability */
   .status-badge-success {
-    @apply bg-success/10 text-success border border-success/20;
+    @apply bg-success/20 text-success dark:bg-success/25 border border-success/30 font-medium;
   }
 
   .status-badge-warning {
-    @apply bg-warning/10 text-warning border border-warning/20;
+    @apply bg-warning/20 text-warning dark:bg-warning/25 border border-warning/30 font-medium;
   }
 
   .status-badge-error {
-    @apply bg-destructive/10 text-destructive border border-destructive/20;
+    @apply bg-destructive/20 text-destructive dark:bg-destructive/25 border border-destructive/30 font-medium;
+  }
+
+  .status-badge-info {
+    @apply bg-info/20 text-info dark:bg-info/25 border border-info/30 font-medium;
+  }
+
+  /* Professional table styling */
+  .table-row-hover {
+    @apply hover:bg-muted/40 transition-colors duration-200;
+  }
+
+  /* Elevated card for important stats */
+  .stat-card {
+    @apply bg-card border border-border/50 rounded-lg p-6 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-primary/30 hover:-translate-y-0.5;
+  }
+
+  /* Professional button hover effects */
+  .btn-primary-hover {
+    @apply hover:bg-primary/90 active:bg-primary/80 transition-all duration-200;
+  }
+
+  /* Smooth fade-in animation */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Professional scrollbar with theme awareness */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-muted/30 rounded-full;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full hover:bg-muted-foreground/50 transition-colors;
+  }
+
+  /* Smooth pulse animation for loading states */
+  @keyframes pulse-soft {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+
+  .animate-pulse-soft {
+    animation: pulse-soft 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Sidebar animations */
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .animate-slide-in {
+    animation: slideInLeft 0.3s ease-out forwards;
+  }
+
+  /* Card shine effect on hover */
+  .card-shine {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-shine::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s;
+  }
+
+  .card-shine:hover::before {
+    left: 100%;
   }
 }

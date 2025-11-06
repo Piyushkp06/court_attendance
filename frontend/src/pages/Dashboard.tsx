@@ -1,102 +1,188 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Users, CheckCircle2, AlertCircle } from "lucide-react";
+import { FileText, Users, CheckCircle2, AlertCircle, TrendingUp, Calendar, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 const statsCards = [
   {
     title: "Total Cases",
     value: "234",
     icon: FileText,
-    trend: "+12% from last month",
-    color: "text-primary"
+    trend: "+12%",
+    trendLabel: "from last month",
+    trendUp: true,
+    color: "text-blue-600 dark:text-blue-400",
+    bgColor: "bg-blue-50 dark:bg-blue-950/30",
+    borderColor: "border-blue-200 dark:border-blue-800/50",
+    progress: 75
   },
   {
     title: "Active Officers",
     value: "45",
     icon: Users,
-    trend: "Currently on duty",
-    color: "text-accent"
+    trend: "+3",
+    trendLabel: "new this week",
+    trendUp: true,
+    color: "text-purple-600 dark:text-purple-400",
+    bgColor: "bg-purple-50 dark:bg-purple-950/30",
+    borderColor: "border-purple-200 dark:border-purple-800/50",
+    progress: 90
   },
   {
     title: "Today's Attendance",
     value: "42/45",
     icon: CheckCircle2,
-    trend: "93% attendance rate",
-    color: "text-success"
+    trend: "93%",
+    trendLabel: "attendance rate",
+    trendUp: true,
+    color: "text-green-600 dark:text-green-400",
+    bgColor: "bg-green-50 dark:bg-green-950/30",
+    borderColor: "border-green-200 dark:border-green-800/50",
+    progress: 93
   },
   {
     title: "Pending Alerts",
     value: "8",
     icon: AlertCircle,
-    trend: "Requires attention",
-    color: "text-warning"
+    trend: "-2",
+    trendLabel: "from yesterday",
+    trendUp: false,
+    color: "text-orange-600 dark:text-orange-400",
+    bgColor: "bg-orange-50 dark:bg-orange-950/30",
+    borderColor: "border-orange-200 dark:border-orange-800/50",
+    progress: 35
   }
 ];
 
 const recentCases = [
-  { id: "CID/2024/001", court: "District Court-A", date: "2024-11-08", io: "SI Ramesh Kumar", status: "Present" },
-  { id: "CID/2024/002", court: "District Court-B", date: "2024-11-08", io: "SI Priya Patel", status: "Present" },
-  { id: "CID/2024/003", court: "Sessions Court", date: "2024-11-08", io: "ASI Suresh Nayak", status: "Absent" },
-  { id: "CID/2024/004", court: "District Court-A", date: "2024-11-08", io: "SI Anjali Das", status: "Late" },
+  { id: "CID/2024/001", court: "District Court-A", date: "2024-11-08", io: "SI Ramesh Kumar", status: "Present", time: "09:30 AM" },
+  { id: "CID/2024/002", court: "District Court-B", date: "2024-11-08", io: "SI Priya Patel", status: "Present", time: "10:15 AM" },
+  { id: "CID/2024/003", court: "Sessions Court", date: "2024-11-08", io: "ASI Suresh Nayak", status: "Absent", time: "--" },
+  { id: "CID/2024/004", court: "District Court-A", date: "2024-11-08", io: "SI Anjali Das", status: "Late", time: "10:45 AM" },
+  { id: "CID/2024/005", court: "High Court", date: "2024-11-08", io: "Inspector Raj Mohan", status: "Present", time: "09:00 AM" },
 ];
 
 const Dashboard = () => {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Welcome back! Here's your overview for today.</p>
+    <div className="space-y-8 animate-fade-in">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Dashboard Overview</h1>
+          <p className="text-muted-foreground mt-2 flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            <span>Welcome back! Here's your overview for today - {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          </p>
+        </div>
+        <Button className="btn-primary-hover">
+          <TrendingUp className="w-4 h-4 mr-2" />
+          Generate Report
+        </Button>
       </div>
 
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsCards.map((stat, index) => (
-          <Card key={index} className="glass-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {stat.title}
-              </CardTitle>
-              <stat.icon className={`w-5 h-5 ${stat.color}`} />
+          <Card key={index} className={cn(
+            "relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 cursor-pointer border-2",
+            stat.borderColor
+          )}>
+            {/* Decorative background gradient */}
+            <div className={cn("absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20", stat.bgColor)} 
+                 style={{ transform: 'translate(30%, -30%)' }} />
+            
+            <CardHeader className="flex flex-row items-start justify-between pb-3 space-y-0 relative z-10">
+              <div className="space-y-1">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {stat.title}
+                </CardTitle>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl font-bold text-foreground">{stat.value}</p>
+                  <div className={cn(
+                    "flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full",
+                    stat.trendUp 
+                      ? "bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-400" 
+                      : "bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-400"
+                  )}>
+                    {stat.trendUp ? (
+                      <ArrowUpRight className="w-3 h-3" />
+                    ) : (
+                      <ArrowDownRight className="w-3 h-3" />
+                    )}
+                    {stat.trend}
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">{stat.trendLabel}</p>
+              </div>
+              
+              <div className={cn(
+                "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110",
+                stat.bgColor
+              )}>
+                <stat.icon className={cn("w-7 h-7", stat.color)} />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">{stat.value}</div>
-              <p className="text-xs text-muted-foreground mt-2">{stat.trend}</p>
+            
+            <CardContent className="relative z-10 pt-0">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Progress</span>
+                  <span className="font-semibold text-foreground">{stat.progress}%</span>
+                </div>
+                <Progress value={stat.progress} className="h-2" />
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
+      {/* Today's Court Schedule */}
       <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="text-foreground">Today's Court Schedule</CardTitle>
+        <CardHeader className="border-b border-border bg-muted/30">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <CardTitle className="text-xl font-bold text-foreground">Today's Court Schedule</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">Real-time attendance tracking for all court proceedings</p>
+            </div>
+            <Button variant="outline" size="sm">
+              View All Cases
+            </Button>
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
+        <CardContent className="p-0">
+          <div className="overflow-x-auto custom-scrollbar">
             <table className="w-full">
-              <thead>
+              <thead className="bg-muted/50">
                 <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Case ID</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Court</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Date</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">IO Name</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Status</th>
+                  <th className="text-left py-4 px-6 text-sm font-semibold text-foreground">Case ID</th>
+                  <th className="text-left py-4 px-6 text-sm font-semibold text-foreground">Court</th>
+                  <th className="text-left py-4 px-6 text-sm font-semibold text-foreground">Date</th>
+                  <th className="text-left py-4 px-6 text-sm font-semibold text-foreground">Investigating Officer</th>
+                  <th className="text-left py-4 px-6 text-sm font-semibold text-foreground">Time</th>
+                  <th className="text-left py-4 px-6 text-sm font-semibold text-foreground">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {recentCases.map((case_, index) => (
-                  <tr key={index} className="border-b border-border hover:bg-muted/50 transition-colors">
-                    <td className="py-3 px-4 text-sm font-medium text-primary">{case_.id}</td>
-                    <td className="py-3 px-4 text-sm text-foreground">{case_.court}</td>
-                    <td className="py-3 px-4 text-sm text-foreground">{case_.date}</td>
-                    <td className="py-3 px-4 text-sm text-foreground">{case_.io}</td>
-                    <td className="py-3 px-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        case_.status === "Present" 
+                  <tr key={index} className="border-b border-border table-row-hover">
+                    <td className="py-4 px-6 text-sm font-semibold text-primary">{case_.id}</td>
+                    <td className="py-4 px-6 text-sm text-foreground">{case_.court}</td>
+                    <td className="py-4 px-6 text-sm text-foreground">{case_.date}</td>
+                    <td className="py-4 px-6 text-sm text-foreground font-medium">{case_.io}</td>
+                    <td className="py-4 px-6 text-sm text-muted-foreground">{case_.time}</td>
+                    <td className="py-4 px-6">
+                      <Badge className={`
+                        ${case_.status === "Present" 
                           ? "status-badge-success" 
                           : case_.status === "Late"
                           ? "status-badge-warning"
                           : "status-badge-error"
-                      }`}>
+                        }
+                      `}>
                         {case_.status}
-                      </span>
+                      </Badge>
                     </td>
                   </tr>
                 ))}
