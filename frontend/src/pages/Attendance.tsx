@@ -1,12 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar, Clock, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
+import apiClient from "@/utils/apiClient";
+import { ATTENDANCE_TODAY, ATTENDANCE_MARK, ATTENDANCE_REPORT } from "@/utils/constants";
 
-const attendanceRecords = [
+// Mock data - will be replaced with API data when backend is ready
+const mockAttendanceRecords = [
   { id: 1, caseId: "CID/2024/001", officer: "SI Ramesh Kumar", court: "District Court-A", time: "10:00 AM", marked: false },
   { id: 2, caseId: "CID/2024/002", officer: "SI Priya Patel", court: "District Court-B", time: "11:30 AM", marked: false },
   { id: 3, caseId: "CID/2024/003", officer: "ASI Suresh Nayak", court: "Sessions Court", time: "02:00 PM", marked: false },
@@ -14,10 +17,53 @@ const attendanceRecords = [
 ];
 
 const Attendance = () => {
-  const [records, setRecords] = useState(attendanceRecords);
+  const [records, setRecords] = useState(mockAttendanceRecords); // Using mock data initially
   const [remarks, setRemarks] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleMarkAttendance = (id: number) => {
+  // Fetch today's attendance records - API function (uncomment when backend is ready)
+  const fetchTodayAttendance = async () => {
+    try {
+      setLoading(true);
+      const response = await apiClient.get(ATTENDANCE_TODAY);
+      setRecords(response.data);
+      toast.success("Attendance records loaded");
+    } catch (error) {
+      toast.error("Failed to fetch attendance records");
+      console.error("Error fetching attendance:", error);
+      // Fallback to mock data on error
+      setRecords(mockAttendanceRecords);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Mark attendance for an officer
+  const handleMarkAttendance = async (attendanceData) => {
+    try {
+      await apiClient.post(ATTENDANCE_MARK, attendanceData);
+      toast.success("Attendance marked successfully");
+      fetchTodayAttendance();
+    } catch (error) {
+      toast.error("Failed to mark attendance");
+      console.error("Error marking attendance:", error);
+    }
+  };
+
+  // Fetch attendance report with query parameters
+  const fetchAttendanceReport = async (queryParams = {}) => {
+    try {
+      const response = await apiClient.get(ATTENDANCE_REPORT, { params: queryParams });
+      return response.data;
+    } catch (error) {
+      toast.error("Failed to fetch attendance report");
+      console.error("Error fetching report:", error);
+      return null;
+    }
+  };
+
+  // Toggle attendance checkbox
+  const toggleAttendanceCheckbox = (id: number) => {
     setRecords(prev =>
       prev.map(record =>
         record.id === id ? { ...record, marked: !record.marked } : record
@@ -25,10 +71,36 @@ const Attendance = () => {
     );
   };
 
-  const handleSubmit = () => {
-    const markedCount = records.filter(r => r.marked).length;
-    toast.success(`Attendance submitted for ${markedCount} officer(s)`);
+  // Submit all marked attendance
+  const handleSubmit = async () => {
+    const markedRecords = records.filter(r => r.marked);
+    
+    if (markedRecords.length === 0) {
+      toast.error("Please mark at least one attendance");
+      return;
+    }
+
+    try {
+      for (const record of markedRecords) {
+        await handleMarkAttendance({
+          caseId: record.caseId,
+          officer: record.officer,
+          status: "present",
+          remarks: remarks,
+          timestamp: new Date().toISOString()
+        });
+      }
+      toast.success(`Attendance submitted for ${markedRecords.length} officer(s)`);
+      setRemarks("");
+    } catch (error) {
+      toast.error("Failed to submit attendance");
+    }
   };
+
+  // Uncomment this to enable API calls when backend is ready
+  // useEffect(() => {
+  //   fetchTodayAttendance();
+  // }, []);
 
   return (
     <div className="space-y-6">
@@ -82,49 +154,55 @@ const Attendance = () => {
           <CardTitle className="text-foreground">Mark Attendance</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Case ID</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Officer Name</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Court</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Scheduled Time</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Present</th>
-                </tr>
-              </thead>
-              <tbody>
-                {records.map((record) => (
-                  <tr key={record.id} className="border-b border-border hover:bg-muted/50 transition-colors">
-                    <td className="py-3 px-4 text-sm font-medium text-primary">{record.caseId}</td>
-                    <td className="py-3 px-4 text-sm text-foreground">{record.officer}</td>
-                    <td className="py-3 px-4 text-sm text-foreground">{record.court}</td>
-                    <td className="py-3 px-4 text-sm text-foreground">{record.time}</td>
-                    <td className="py-3 px-4">
-                      <Checkbox
-                        checked={record.marked}
-                        onCheckedChange={() => handleMarkAttendance(record.id)}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {loading ? (
+            <div className="text-center py-8">Loading attendance records...</div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Case ID</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Officer Name</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Court</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Scheduled Time</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Present</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {records.map((record) => (
+                      <tr key={record.id} className="border-b border-border hover:bg-muted/50 transition-colors">
+                        <td className="py-3 px-4 text-sm font-medium text-primary">{record.caseId}</td>
+                        <td className="py-3 px-4 text-sm text-foreground">{record.officer}</td>
+                        <td className="py-3 px-4 text-sm text-foreground">{record.court}</td>
+                        <td className="py-3 px-4 text-sm text-foreground">{record.time}</td>
+                        <td className="py-3 px-4">
+                          <Checkbox
+                            checked={record.marked}
+                            onCheckedChange={() => toggleAttendanceCheckbox(record.id)}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Remarks (Optional)</label>
-            <Textarea
-              placeholder="Add any remarks or notes..."
-              value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
-              className="min-h-[100px]"
-            />
-          </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Remarks (Optional)</label>
+                <Textarea
+                  placeholder="Add any remarks or notes..."
+                  value={remarks}
+                  onChange={(e) => setRemarks(e.target.value)}
+                  className="min-h-[100px]"
+                />
+              </div>
 
-          <Button onClick={handleSubmit} className="w-full bg-primary hover:bg-primary/90">
-            Submit Attendance
-          </Button>
+              <Button onClick={handleSubmit} className="w-full bg-primary hover:bg-primary/90">
+                Submit Attendance
+              </Button>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

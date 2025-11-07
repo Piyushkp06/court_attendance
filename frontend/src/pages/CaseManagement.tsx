@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, Search, Filter } from "lucide-react";
+import { Upload, Search, Filter, Trash2, Edit, Eye } from "lucide-react";
 import { toast } from "sonner";
+import apiClient from "@/utils/apiClient";
+import { CASE_LIST, CASE_CREATE, CASE_DETAIL, CASE_UPDATE } from "@/utils/constants";
 
+// Mock data - will be replaced with API data when backend is ready
 const mockCases = [
   { id: "CID/2024/001", court: "District Court-A", date: "2024-11-08", io: "SI Ramesh Kumar", witnesses: 3, status: "Present" },
   { id: "CID/2024/002", court: "District Court-B", date: "2024-11-09", io: "SI Priya Patel", witnesses: 2, status: "Pending" },
@@ -16,15 +19,88 @@ const mockCases = [
 
 const CaseManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [cases, setCases] = useState(mockCases); // Using mock data initially
+  const [loading, setLoading] = useState(false);
 
+  // Fetch all cases - API function (uncomment when backend is ready)
+  const fetchCases = async () => {
+    try {
+      setLoading(true);
+      const response = await apiClient.get(CASE_LIST);
+      setCases(response.data);
+      toast.success("Cases loaded successfully");
+    } catch (error) {
+      toast.error("Failed to fetch cases");
+      console.error("Error fetching cases:", error);
+      // Fallback to mock data on error
+      setCases(mockCases);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch a single case by ID
+  const fetchCaseById = async (caseId) => {
+    try {
+      const response = await apiClient.get(CASE_DETAIL(caseId));
+      return response.data;
+    } catch (error) {
+      toast.error("Failed to fetch case details");
+      console.error("Error fetching case:", error);
+      return null;
+    }
+  };
+
+  // Create a new case
+  const handleCreateCase = async (caseData) => {
+    try {
+      await apiClient.post(CASE_CREATE, caseData);
+      toast.success("Case created successfully");
+      fetchCases();
+    } catch (error) {
+      toast.error("Failed to create case");
+      console.error("Error creating case:", error);
+    }
+  };
+
+  // Update an existing case
+  const handleUpdateCase = async (caseId, caseData) => {
+    try {
+      await apiClient.put(CASE_UPDATE(caseId), caseData);
+      toast.success("Case updated successfully");
+      fetchCases();
+    } catch (error) {
+      toast.error("Failed to update case");
+      console.error("Error updating case:", error);
+    }
+  };
+
+  // Delete a case (if backend supports it)
+  const handleDeleteCase = async (caseId) => {
+    try {
+      await apiClient.delete(CASE_DETAIL(caseId));
+      toast.success("Case deleted successfully");
+      fetchCases();
+    } catch (error) {
+      toast.error("Failed to delete case");
+      console.error("Error deleting case:", error);
+    }
+  };
+
+  // Handle CSV file upload
   const handleFileUpload = () => {
     toast.success("CSV upload functionality coming soon");
   };
 
-  const filteredCases = mockCases.filter(case_ =>
-    case_.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    case_.io.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    case_.court.toLowerCase().includes(searchTerm.toLowerCase())
+  // Uncomment this to enable API calls when backend is ready
+  // useEffect(() => {
+  //   fetchCases();
+  // }, []);
+
+  const filteredCases = cases.filter(case_ =>
+    case_.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    case_.io?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    case_.court?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -59,48 +135,74 @@ const CaseManagement = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Case ID</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Court</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Date</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">IO Name</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Witnesses</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Status</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredCases.map((case_, index) => (
-                  <tr key={index} className="border-b border-border hover:bg-muted/50 transition-colors">
-                    <td className="py-3 px-4 text-sm font-medium text-primary">{case_.id}</td>
-                    <td className="py-3 px-4 text-sm text-foreground">{case_.court}</td>
-                    <td className="py-3 px-4 text-sm text-foreground">{case_.date}</td>
-                    <td className="py-3 px-4 text-sm text-foreground">{case_.io}</td>
-                    <td className="py-3 px-4 text-sm text-foreground">{case_.witnesses}</td>
-                    <td className="py-3 px-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        case_.status === "Present" 
-                          ? "status-badge-success" 
-                          : case_.status === "Late"
-                          ? "status-badge-warning"
-                          : case_.status === "Pending"
-                          ? "bg-muted text-muted-foreground border border-border"
-                          : "status-badge-error"
-                      }`}>
-                        {case_.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <Button variant="ghost" size="sm">View Details</Button>
-                    </td>
+          {loading ? (
+            <div className="text-center py-8">Loading cases...</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Case ID</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Court</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">IO Name</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Witnesses</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Status</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredCases.map((case_, index) => (
+                    <tr key={index} className="border-b border-border hover:bg-muted/50 transition-colors">
+                      <td className="py-3 px-4 text-sm font-medium text-primary">{case_.id}</td>
+                      <td className="py-3 px-4 text-sm text-foreground">{case_.court}</td>
+                      <td className="py-3 px-4 text-sm text-foreground">{case_.date}</td>
+                      <td className="py-3 px-4 text-sm text-foreground">{case_.io}</td>
+                      <td className="py-3 px-4 text-sm text-foreground">{case_.witnesses}</td>
+                      <td className="py-3 px-4">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          case_.status === "Present" 
+                            ? "status-badge-success" 
+                            : case_.status === "Late"
+                            ? "status-badge-warning"
+                            : case_.status === "Pending"
+                            ? "bg-muted text-muted-foreground border border-border"
+                            : "status-badge-error"
+                        }`}>
+                          {case_.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => fetchCaseById(case_.id)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleUpdateCase(case_.id, case_)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleDeleteCase(case_.id)}
+                          >
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

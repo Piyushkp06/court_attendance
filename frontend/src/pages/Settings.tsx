@@ -1,14 +1,109 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import apiClient from "@/utils/apiClient";
+import { SETTINGS_GET, SETTINGS_UPDATE } from "@/utils/constants";
 
 const Settings = () => {
-  const handleSave = () => {
-    toast.success("Settings saved successfully");
+  // Using default values - will be replaced with API data when backend is ready
+  const [formData, setFormData] = useState({
+    name: "Admin User",
+    employeeId: "EMP001",
+    email: "admin@odishapolice.gov.in",
+    phone: "+91 9876543210",
+    emailNotifications: true,
+    smsNotifications: true,
+    courtReminders: true,
+  });
+  const [loading, setLoading] = useState(false);
+
+  // Fetch a specific setting by key - API function (uncomment when backend is ready)
+  const fetchSetting = async (key) => {
+    try {
+      const response = await apiClient.get(SETTINGS_GET(key));
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching setting ${key}:`, error);
+      return null;
+    }
   };
+
+  // Update a specific setting by key - API function (uncomment when backend is ready)
+  const handleUpdateSetting = async (key, value) => {
+    try {
+      await apiClient.put(SETTINGS_UPDATE(key), { value });
+      toast.success(`${key} updated successfully`);
+    } catch (error) {
+      toast.error(`Failed to update ${key}`);
+      console.error(`Error updating setting ${key}:`, error);
+    }
+  };
+
+  // Load all settings on mount - API function (uncomment when backend is ready)
+  const loadSettings = async () => {
+    try {
+      setLoading(true);
+      // Fetch multiple settings if needed
+      const settings = await Promise.all([
+        fetchSetting("profile"),
+        fetchSetting("notifications"),
+      ]);
+      
+      if (settings[0]) {
+        setFormData(prev => ({
+          ...prev,
+          ...settings[0]
+        }));
+      }
+      
+      if (settings[1]) {
+        setFormData(prev => ({
+          ...prev,
+          ...settings[1]
+        }));
+      }
+    } catch (error) {
+      toast.error("Failed to load settings");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Save all settings
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      
+      // When API is ready, uncomment these lines:
+      // await handleUpdateSetting("profile", {
+      //   name: formData.name,
+      //   employeeId: formData.employeeId,
+      //   email: formData.email,
+      //   phone: formData.phone,
+      // });
+      
+      // await handleUpdateSetting("notifications", {
+      //   emailNotifications: formData.emailNotifications,
+      //   smsNotifications: formData.smsNotifications,
+      //   courtReminders: formData.courtReminders,
+      // });
+      
+      toast.success("Settings saved successfully");
+    } catch (error) {
+      toast.error("Failed to save settings");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Uncomment this to enable API calls when backend is ready
+  // useEffect(() => {
+  //   loadSettings();
+  // }, []);
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -26,21 +121,43 @@ const Settings = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
-              <Input id="name" placeholder="Enter your name" defaultValue="Admin User" />
+              <Input 
+                id="name" 
+                placeholder="Enter your name" 
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="employee-id">Employee ID</Label>
-              <Input id="employee-id" placeholder="Enter employee ID" defaultValue="EMP001" />
+              <Input 
+                id="employee-id" 
+                placeholder="Enter employee ID" 
+                value={formData.employeeId}
+                onChange={(e) => setFormData({...formData, employeeId: e.target.value})}
+              />
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="Enter email" defaultValue="admin@odishapolice.gov.in" />
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="Enter email" 
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
-              <Input id="phone" type="tel" placeholder="Enter phone number" defaultValue="+91 9876543210" />
+              <Input 
+                id="phone" 
+                type="tel" 
+                placeholder="Enter phone number" 
+                value={formData.phone}
+                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+              />
             </div>
           </div>
         </CardContent>
@@ -57,21 +174,33 @@ const Settings = () => {
               <Label htmlFor="email-notifications">Email Notifications</Label>
               <p className="text-sm text-muted-foreground">Receive alerts via email</p>
             </div>
-            <Switch id="email-notifications" defaultChecked />
+            <Switch 
+              id="email-notifications" 
+              checked={formData.emailNotifications}
+              onCheckedChange={(checked) => setFormData({...formData, emailNotifications: checked})}
+            />
           </div>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label htmlFor="sms-notifications">SMS Notifications</Label>
               <p className="text-sm text-muted-foreground">Receive alerts via SMS</p>
             </div>
-            <Switch id="sms-notifications" defaultChecked />
+            <Switch 
+              id="sms-notifications" 
+              checked={formData.smsNotifications}
+              onCheckedChange={(checked) => setFormData({...formData, smsNotifications: checked})}
+            />
           </div>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label htmlFor="court-reminders">Court Date Reminders</Label>
               <p className="text-sm text-muted-foreground">Get reminders for upcoming hearings</p>
             </div>
-            <Switch id="court-reminders" defaultChecked />
+            <Switch 
+              id="court-reminders" 
+              checked={formData.courtReminders}
+              onCheckedChange={(checked) => setFormData({...formData, courtReminders: checked})}
+            />
           </div>
         </CardContent>
       </Card>
@@ -100,8 +229,8 @@ const Settings = () => {
 
       <div className="flex justify-end gap-4">
         <Button variant="outline">Cancel</Button>
-        <Button onClick={handleSave} className="bg-primary hover:bg-primary/90">
-          Save Changes
+        <Button onClick={handleSave} className="bg-primary hover:bg-primary/90" disabled={loading}>
+          {loading ? "Saving..." : "Save Changes"}
         </Button>
       </div>
     </div>

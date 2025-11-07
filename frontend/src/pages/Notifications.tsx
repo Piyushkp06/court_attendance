@@ -1,9 +1,14 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bell, Clock, AlertTriangle, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
+import apiClient from "@/utils/apiClient";
+import { NOTIFICATIONS_LIST, NOTIFICATION_CREATE, NOTIFICATION_MARK_READ } from "@/utils/constants";
 
-const notifications = [
+// Mock data - will be replaced with API data when backend is ready
+const mockNotifications = [
   {
     id: 1,
     type: "reminder",
@@ -52,6 +57,69 @@ const notifications = [
 ];
 
 const Notifications = () => {
+  const [notifications, setNotifications] = useState(mockNotifications); // Using mock data initially
+  const [loading, setLoading] = useState(false);
+
+  // Fetch all notifications - API function (uncomment when backend is ready)
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const response = await apiClient.get(NOTIFICATIONS_LIST);
+      setNotifications(response.data);
+      toast.success("Notifications loaded");
+    } catch (error) {
+      toast.error("Failed to fetch notifications");
+      console.error("Error fetching notifications:", error);
+      // Fallback to mock data on error
+      setNotifications(mockNotifications);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Create a new notification
+  const handleCreateNotification = async (notificationData) => {
+    try {
+      await apiClient.post(NOTIFICATION_CREATE, notificationData);
+      toast.success("Notification created successfully");
+      fetchNotifications();
+    } catch (error) {
+      toast.error("Failed to create notification");
+      console.error("Error creating notification:", error);
+    }
+  };
+
+  // Mark a notification as read
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await apiClient.patch(NOTIFICATION_MARK_READ(notificationId));
+      toast.success("Notification marked as read");
+      fetchNotifications();
+    } catch (error) {
+      toast.error("Failed to mark notification as read");
+      console.error("Error marking notification:", error);
+    }
+  };
+
+  // Mark all notifications as read
+  const handleMarkAllAsRead = async () => {
+    try {
+      const unreadNotifications = notifications.filter(n => !n.read);
+      for (const notification of unreadNotifications) {
+        await apiClient.patch(NOTIFICATION_MARK_READ(notification.id));
+      }
+      toast.success("All notifications marked as read");
+      fetchNotifications();
+    } catch (error) {
+      toast.error("Failed to mark all as read");
+      console.error("Error marking all as read:", error);
+    }
+  };
+
+  // Uncomment this to enable API calls when backend is ready
+  // useEffect(() => {
+  //   fetchNotifications();
+  // }, []);
   const getIcon = (type: string) => {
     switch (type) {
       case "alert":
@@ -81,45 +149,57 @@ const Notifications = () => {
           <h1 className="text-3xl font-bold text-foreground">Notifications</h1>
           <p className="text-muted-foreground mt-1">Stay updated with alerts and reminders</p>
         </div>
-        <Button variant="outline">Mark All as Read</Button>
+        <Button variant="outline" onClick={handleMarkAllAsRead}>
+          Mark All as Read
+        </Button>
       </div>
 
-      <div className="space-y-3">
-        {notifications.map((notification) => (
-          <Card key={notification.id} className={`glass-card transition-all hover:shadow-lg ${!notification.read ? 'border-l-4 border-l-accent' : ''}`}>
-            <CardContent className="p-4">
-              <div className="flex items-start gap-4">
-                <div className="mt-1">
-                  {getIcon(notification.type)}
-                </div>
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-foreground">{notification.title}</h3>
-                        {!notification.read && (
-                          <Badge variant="secondary" className="bg-accent text-primary">New</Badge>
-                        )}
-                        <Badge className={getPriorityColor(notification.priority)}>
-                          {notification.priority}
-                        </Badge>
+      {loading ? (
+        <div className="text-center py-8">Loading notifications...</div>
+      ) : (
+        <div className="space-y-3">
+          {notifications.map((notification) => (
+            <Card key={notification.id} className={`glass-card transition-all hover:shadow-lg ${!notification.read ? 'border-l-4 border-l-accent' : ''}`}>
+              <CardContent className="p-4">
+                <div className="flex items-start gap-4">
+                  <div className="mt-1">
+                    {getIcon(notification.type)}
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-foreground">{notification.title}</h3>
+                          {!notification.read && (
+                            <Badge variant="secondary" className="bg-accent text-primary">New</Badge>
+                          )}
+                          <Badge className={getPriorityColor(notification.priority)}>
+                            {notification.priority}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{notification.message}</p>
                       </div>
-                      <p className="text-sm text-muted-foreground">{notification.message}</p>
+                      {!notification.read && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleMarkAsRead(notification.id)}
+                        >
+                          Mark as Read
+                        </Button>
+                      )}
                     </div>
-                    {!notification.read && (
-                      <Button variant="ghost" size="sm">Mark as Read</Button>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Clock className="w-3 h-3" />
-                    <span>{notification.time}</span>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Clock className="w-3 h-3" />
+                      <span>{notification.time}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
