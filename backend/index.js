@@ -61,7 +61,7 @@ app.use((err, req, res, next) => {
 
 // Start server + DB
 const PORT = process.env.PORT || 3000;
-const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/court_attendance";
+const MONGO_URI = process.env.MONGO_URI ;
 
 mongoose
 	.connect(MONGO_URI)
